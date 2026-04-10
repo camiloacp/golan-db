@@ -1,0 +1,31 @@
+package invoiceitem
+
+import "time"
+
+// Model of invoiceitem
+type Model struct {
+	ID              uint
+	InvoiceHeaderID uint
+	ProductID       uint
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+}
+
+type Storage interface {
+	Migration() error
+}
+
+// Service of invoiceitem
+type Service struct {
+	storage Storage
+}
+
+// NewService return a new pointer of Service
+func NewService(s Storage) *Service {
+	return &Service{storage: s}
+}
+
+// Migrate is used to migrate the product table
+func (s *Service) Migrate() error {
+	return s.storage.Migration()
+}
