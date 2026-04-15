@@ -19,7 +19,7 @@ type Models []*Model
 
 // Storage interface that must be implemented by the storage layer
 type Storage interface {
-	Migration() error
+	Migrate() error
 	CreateTx(*sql.Tx, uint, Models) error
 }
 
@@ -35,5 +35,5 @@ func NewService(s Storage) *Service {
 
 // Migrate is used to migrate the product table
 func (s *Service) Migrate() error {
-	return s.storage.Migration()
+	return s.storage.Migrate()
 }

@@ -26,7 +26,7 @@ func NewPsqlInvoiceHeader(db *sql.DB) *PsqlInvoiceHeader {
 }
 
 // Migrate implement the invoiceheader.Storage interface
-func (p *PsqlInvoiceHeader) Migration() error {
+func (p *PsqlInvoiceHeader) Migrate() error {
 	stmt, err := p.db.Prepare(psqlMigrateInvoiceHeader)
 	if err != nil {
 		return err
