@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"fmt"
 	"mian/pkg/invoice"
 	"mian/pkg/invoiceheader"
 	"mian/pkg/invoiceitem"
@@ -32,13 +33,14 @@ func (p *PsqlInvoice) Create(m *invoice.Model) error {
 
 	if err := p.sorageHeader.CreateTx(tx, m.Header); err != nil {
 		tx.Rollback()
-		return err
+		return fmt.Errorf("Header: %w", err)
 	}
+	fmt.Printf("Invoice header created successfully with ID: %d \n", m.Header.ID)
 
 	if err := p.sorageItem.CreateTx(tx, m.Header.ID, m.Items); err != nil {
 		tx.Rollback()
-		return err
+		return fmt.Errorf("Items: %w", err)
 	}
-
+	fmt.Printf("Items created: %d\n", len(m.Items))
 	return tx.Commit()
 }

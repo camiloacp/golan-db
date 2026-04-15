@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"fmt"
+	"mian/pkg/invoiceheader"
 )
 
 const (
@@ -13,6 +14,11 @@ const (
 		created_at TIMESTAMP NOT NULL DEFAULT now(),
 		updated_at TIMESTAMP
 	)`
+
+	psqlCreateInvoiceHeader = `
+	INSERT INTO invoice_headers (client) VALUES ($1)
+	RETURNING id, created_at
+	`
 )
 
 // PsqlInvoiceHeader used for work with postgrs - invoiceHeader
@@ -39,4 +45,14 @@ func (p *PsqlInvoiceHeader) Migrate() error {
 	}
 	fmt.Println("Migration invoiceheader success")
 	return nil
+}
+
+func (p *PsqlInvoiceHeader) CreateTx(tx *sql.Tx, m *invoiceheader.Model) error {
+	stmt, err := tx.Prepare(psqlCreateInvoiceHeader)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	return stmt.QueryRow(m.Client).Scan(&m.ID, &m.CreatedAt)
 }

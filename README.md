@@ -163,3 +163,19 @@ if err != nil {
 ```
 
 Los campos que no se asignen se actualizaran con su zero value. El campo `updated_at` se actualiza automaticamente con el timestamp actual.
+
+## Eliminar un registro
+
+Para eliminar un producto por su ID, se llama al metodo `Delete` del servicio pasando el ID como argumento:
+
+```go
+storageProduct := storage.NewPsqlProduct(storage.Pool())
+serviceProduct := product.NewService(storageProduct)
+
+err := serviceProduct.Delete(3)
+if err != nil {
+    log.Fatalf("product.Delete: %v", err)
+}
+```
+
+El metodo ejecuta un `DELETE FROM products WHERE id = $1`. Una vez eliminado el registro, el codigo fue removido de `main.go`.

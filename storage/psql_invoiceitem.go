@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"fmt"
+	"mian/pkg/invoiceitem"
 )
 
 const (
@@ -18,6 +19,11 @@ const (
 		CONSTRAINT invoice_items_product_id_fk FOREIGN KEY 
 		(product_id) REFERENCES products(id) ON UPDATE RESTRICT ON DELETE RESTRICT
 	)`
+
+	psqlCreateInvoiceItem = `
+	INSERT INTO invoice_items (invoice_header_id, product_id) VALUES ($1, $2)
+	RETURNING id, created_at
+	`
 )
 
 // PsqlInvoiceItem used for work with postgrs - invoiceItem
@@ -31,7 +37,7 @@ func NewPsqlInvoiceItem(db *sql.DB) *PsqlInvoiceItem {
 }
 
 // Migrate implement the invoiceitem.Storage interface
-func (p *PsqlInvoiceItem) Migration() error {
+func (p *PsqlInvoiceItem) Migrate() error {
 	stmt, err := p.db.Prepare(psqlMigrateInvoiceItem)
 	if err != nil {
 		return err
@@ -43,5 +49,25 @@ func (p *PsqlInvoiceItem) Migration() error {
 		return err
 	}
 	fmt.Println("Migration invoiceitem success")
+	return nil
+}
+
+func (p *PsqlInvoiceItem) CreateTx(tx *sql.Tx, headerID uint, ms invoiceitem.Models) error {
+	stmt, err := tx.Prepare(psqlCreateInvoiceItem)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, m := range ms {
+		err = stmt.QueryRow(headerID, m.ProductID).Scan(
+			&m.ID,
+			&m.CreatedAt,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
